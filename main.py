@@ -1,19 +1,34 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from database import engine
 from models import Base
-from routers import characters
-from fastapi import WebSocket
+from routers import characters, auth, questions, weapons
+from fastapi.middleware.cors import CORSMiddleware
 
-
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+Base.metadata.create_all(bind=engine)
 
-@app.include_router(characters.router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+app.include_router(characters.router)
+app.include_router(auth.router)
+app.include_router(questions.router)
+app.include_router(weapons.router)
+
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to Neon Ascent RPG!"}
+   
 
 
 @app.websocket("/ws")
